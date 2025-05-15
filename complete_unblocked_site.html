@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Secure Web Viewer</title>
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 222.2 84% 4.9%;
+      --primary: 221.2 83.2% 53.3%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 221.2 83.2% 53.3%;
+      --radius: 0.5rem;
+    }
+
+    .dark {
+      --background: 222.2 84% 4.9%;
+      --foreground: 210 40% 98%;
+      --card: 222.2 84% 4.9%;
+      --card-foreground: 210 40% 98%;
+      --popover: 222.2 84% 4.9%;
+      --popover-foreground: 210 40% 98%;
+      --primary: 217.2 91.2% 59.8%;
+      --primary-foreground: 222.2 47.4% 11.2%;
+      --secondary: 217.2 32.6% 17.5%;
+      --secondary-foreground: 210 40% 98%;
+      --muted: 217.2 32.6% 17.5%;
+      --muted-foreground: 215 20.2% 65.1%;
+      --accent: 217.2 32.6% 17.5%;
+      --accent-foreground: 210 40% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 217.2 32.6% 17.5%;
+      --input: 217.2 32.6% 17.5%;
+      --ring: 224.3 76.3% 48%;
+    }
+
+    * {
+      border-color: hsl(var(--border));
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .header {
+      background-color: hsl(var(--card));
+      border-bottom: 1px solid hsl(var(--border));
+      padding: 1rem 0;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: hsl(var(--primary));
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .main {
+      padding: 2rem 0;
+    }
+
+    .card {
+      background-color: hsl(var(--card));
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--border));
+      padding: 1.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid hsl(var(--border));
+      margin-bottom: 1.5rem;
+    }
+
+    .tab {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      border-bottom-color: hsl(var(--primary));
+      color: hsl(var(--primary));
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .input {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--input));
+      background-color: transparent;
+      color: hsl(var(--foreground));
+      font-size: 0.875rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .button-primary {
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      border: none;
+    }
+
+    .button-primary:hover {
+      opacity: 0.9;
+    }
+
+    .recent-embeds {
+      margin-top: 1.5rem;
+    }
+
+    .recent-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .recent-item {
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      background-color: hsl(var(--secondary));
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .recent-item:hover {
+      background-color: hsl(var(--accent));
+    }
+
+    .status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+
+    .status-success {
+      background-color: rgba(0, 255, 0, 0.1);
+      border: 1px solid rgba(0, 255, 0, 0.2);
+      color: green;
+    }
+
+    .status-error {
+      background-color: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.2);
+      color: red;
+    }
+
+    .info-section {
+      margin-top: 1.5rem;
+      border-top: 1px solid hsl(var(--border));
+      padding-top: 1.5rem;
+    }
+
+    details {
+      margin-bottom: 1rem;
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .game-card {
+      background-color: hsl(var(--secondary));
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .game-card:hover {
+      transform: translateY(-3px);
+      background-color: hsl(var(--accent));
+    }
+
+    .game-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.5rem;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: hsl(var(--foreground));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .animate-slideUp {
+      animation: slideUp 0.3s ease forwards;
+    }
+
+    .animate-scaleIn {
+      animation: scaleIn 0.3s ease forwards;
+    }
+
+    /* Dialog for password protection */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .dialog {
+      background-color: hsl(var(--card));
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: scaleIn 0.3s ease forwards;
+    }
+
+    .dialog-header {
+      margin-bottom: 1rem;
+    }
+
+    .dialog-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .dialog-content {
+      margin-bottom: 1.5rem;
+    }
+
+    .dialog-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Application HTML -->
+  <div id="app">
+    <header class="header">
+      <nav class="container nav">
+        <div class="logo">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 8V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Secure Web Viewer</span>
+        </div>
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2V4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 20V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4.93 4.93L6.34 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17.66 17.66L19.07 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12H4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.34 17.66L4.93 19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19.07 4.93L17.66 6.34" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main class="main container">
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" data-tab="websites">Websites</div>
+          <div class="tab" data-tab="games">Games</div>
+          <div class="tab" data-tab="videos">Videos</div>
+        </div>
+
+        <div class="tab-content" id="websites-content">
+          <form id="embed-form">
+            <div class="input-group">
+              <input type="text" id="url-input" class="input" placeholder="Enter website URL (e.g., example.com)" />
+              <button type="submit" class="button button-primary">Unblock</button>
+            </div>
+          </form>
+
+          <div id="status-area"></div>
+
+          <div class="recent-embeds" id="recent-embeds" style="display:none;">
+            <div class="recent-header">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L15 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Recent Sites
+            </div>
+            <div class="recent-list" id="recent-list"></div>
+          </div>
+
+          <div class="info-section">
+            <details>
+              <summary>
+                <span>How does this work?</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </summary>
+              <div class="info-content animate-slideUp">
+                <p>
+                  This unblocker creates a new window with <code>about:blank</code> and loads the website in an iframe, bypassing many common restrictions including Securly filters.
+                </p>
+                <p>
+                  <strong>Note:</strong> Some websites with strong security measures may still block embedding, especially if they use X-Frame-Options or Content-Security-Policy headers.
+                </p>
+                <p>
+                  Your browsing history and bookmarks won't show the unblocked sites, providing additional privacy.
+                </p>
+                <div style="margin-top: 1rem; padding: 0.75rem; background-color: rgba(59, 130, 246, 0.1); border-radius: var(--radius); border: 1px solid rgba(59, 130, 246, 0.2);">
+                  <h4 style="margin-top: 0; font-size: 0.875rem; font-weight: 600; color: hsl(var(--primary));">Browser Compatibility</h4>
+                  <ul style="padding-left: 1.5rem; margin-bottom: 0; font-size: 0.875rem;">
+                    <li><span style="font-weight: 500;">Chrome/Edge:</span> Best compatibility, works with most websites</li>
+                    <li><span style="font-weight: 500;">Firefox:</span> Good compatibility with most sites</li>
+                    <li><span style="font-weight: 500;">Safari:</span> Compatible but may require pop-up permissions</li>
+                    <li><span style="font-weight: 500;">Mobile browsers:</span> Limited support, best on desktop</li>
+                  </ul>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="tab-content" id="games-content" style="display: none;">
+          <p>Click on a game to open it in an unblocked window:</p>
+          <div class="game-grid">
+            <div class="game-card" data-game="https://yohoho.io/">
+              <div class="game-icon">🏴‍☠️</div>
+              <div>Yohoho.io</div>
+            </div>
+            <div class="game-card" data-game="https://1v1.lol/">
+              <div class="game-icon">🏗️</div>
+              <div>1v1.LOL</div>
+            </div>
+            <div class="game-card" data-game="https://stabfish2.io/">
+              <div class="game-icon">🐠</div>
+              <div>Stabfish.io</div>
+            </div>
+            <div class="game-card" data-game="https://poki.com/">
+              <div class="game-icon">🎮</div>
+              <div>Poki.com</div>
+            </div>
+            <div class="game-card" data-game="https://www.gamepix.com/play/creapy-granny-scream">
+              <div class="game-icon">👵</div>
+              <div>Granny</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-content" id="videos-content" style="display: none;">
+          <p>Click on a video platform to access it in an unblocked window:</p>
+          <div class="game-grid">
+            <div class="game-card" data-video="https://www.youtube.com/">
+              <div class="game-icon">📺</div>
+              <div>YouTube</div>
+            </div>
+            <div class="game-card" data-video="https://www.twitch.tv/">
+              <div class="game-icon">🎬</div>
+              <div>Twitch</div>
+            </div>
+            <div class="game-card" data-video="https://www.dailymotion.com/">
+              <div class="game-icon">📽️</div>
+              <div>Dailymotion</div>
+            </div>
+            <div class="game-card" data-video="https://vimeo.com/">
+              <div class="game-icon">🎥</div>
+              <div>Vimeo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Function to toggle between dark and light mode
+    function toggleTheme() {
+      document.documentElement.classList.toggle('dark');
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', currentTheme);
+    }
+
+    // Initialize theme based on localStorage or system preference
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+
+    // Tab switching functionality
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Remove active class from all tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          
+          // Add active class to clicked tab
+          tab.classList.add('active');
+          
+          // Hide all tab content
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.style.display = 'none';
+          });
+          
+          // Show the selected tab content
+          const tabName = tab.getAttribute('data-tab');
+          document.getElementById(`${tabName}-content`).style.display = 'block';
+        });
+      });
+    }
+
+    // Load embed history from localStorage
+    function loadEmbedHistory() {
+      try {
+        const embedHistory = JSON.parse(localStorage.getItem('embedHistory') || '[]');
+        if (embedHistory.length > 0) {
+          const recentEmbedsContainer = document.getElementById('recent-embeds');
+          const recentList = document.getElementById('recent-list');
+          recentList.innerHTML = '';
+          
+          embedHistory.forEach(item => {
+            const hostname = new URL(item.url).hostname;
+            const listItem = document.createElement('div');
+            listItem.className = 'recent-item';
+            listItem.innerHTML = `
+              <span>${hostname}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            `;
+            
+            listItem.addEventListener('click', () => {
+              document.getElementById('url-input').value = item.url;
+              handleEmbed(item.url);
+            });
+            
+            recentList.appendChild(listItem);
+          });
+          
+          recentEmbedsContainer.style.display = 'block';
+        }
+      } catch (e) {
+        console.error('Error loading embed history:', e);
+      }
+    }
+
+    // Add a URL to embed history
+    function addToHistory(url) {
+      try {
+        let embedHistory = JSON.parse(localStorage.getItem('embedHistory') || '[]');
+        
+        // Check if URL already exists
+        const existingIndex = embedHistory.findIndex(item => item.url === url);
+        if (existingIndex !== -1) {
+          embedHistory.splice(existingIndex, 1);
+        }
+        
+        // Add new entry at the beginning
+        embedHistory.unshift({
+          url: url,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Keep only the last 5 entries
+        embedHistory = embedHistory.slice(0, 5);
+        
+        // Save to localStorage
+        localStorage.setItem('embedHistory', JSON.stringify(embedHistory));
+        
+        // Refresh the display
+        loadEmbedHistory();
+      } catch (e) {
+        console.error('Error adding to history:', e);
+      }
+    }
+
+    // Show status message
+    function showStatus(type, title, message) {
+      const statusArea = document.getElementById('status-area');
+      statusArea.innerHTML = `
+        <div class="status status-${type === 'success' ? 'success' : 'error'} animate-scaleIn">
+          <strong>${title}</strong>
+          <p>${message}</p>
+        </div>
+      `;
+      
+      // Clear the status after 5 seconds
+      setTimeout(() => {
+        statusArea.innerHTML = '';
+      }, 5000);
+    }
+
+    // Validate URL
+    function validateUrl(inputUrl) {
+      if (!inputUrl) {
+        return { isValid: false, message: "Please enter a URL" };
+      }
+      
+      try {
+        // Add protocol if missing
+        if (!/^https?:\/\//i.test(inputUrl)) {
+          inputUrl = "https://" + inputUrl;
+        }
+        
+        const urlObject = new URL(inputUrl);
+        return { isValid: true, url: urlObject.href };
+      } catch (e) {
+        return { isValid: false, message: "Invalid URL format" };
+      }
+    }
+
+    // Create about:blank page with iframe optimized for Securly bypass
+    function handleEmbed(inputUrl) {
+      console.log("handleEmbed called with:", inputUrl);
+      
+      const validation = validateUrl(inputUrl);
+      
+      if (!validation.isValid) {
+        showStatus('error', 'Invalid URL', validation.message || 'Invalid URL');
+        return false;
+      }
+      
+      try {
+        // The URL to embed
+        const embedUrl = validation.url || '';
+        console.log("Attempting to embed URL:", embedUrl);
+        
+        // Create new popup window with about:blank
+        const newWindow = window.open("", "_blank");
+        
+        if (!newWindow) {
+          // Handle popup blockers
+          showStatus('error', 'Popup Blocked', 'Please allow popups for this website to use the embedding feature.');
+          return false;
+        }
+        
+        // Enhanced HTML template for Securly compatibility
+        const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+            <title>Document</title>
+            <style>
+              body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                width: 100%;
+                overflow: hidden;
+                background-color: #f8f9fa;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              }
+              
+              iframe {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+              }
+              
+              .loading {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                z-index: 50;
+              }
+              
+              .spinner {
+                border: 5px solid rgba(0, 0, 0, 0.1);
+                border-radius: 50%;
+                border-top: 5px solid #3498db;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+              }
+              
+              @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              
+              .message {
+                font-size: 18px;
+                color: #444;
+                font-weight: 500;
+              }
+              
+              /* Hide the controls at first */
+              .controls {
+                position: fixed;
+                top: -40px;
+                left: 0;
+                right: 0;
+                height: 40px;
+                background-color: rgba(25, 25, 25, 0.8);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 15px;
+                z-index: 100;
+                transition: top 0.3s ease;
+              }
+              
+              /* Show controls when user hovers at top of screen */
+              body:hover .controls {
+                top: 0;
+              }
+              
+              .control-button {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                font-size: 14px;
+                padding: 5px 10px;
+                opacity: 0.85;
+                transition: opacity 0.2s;
+              }
+              
+              .control-button:hover {
+                opacity: 1;
+              }
+              
+              /* Fullscreen button style */
+              .fullscreen {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+              }
+              
+              /* For WebKit browsers */
+              ::-webkit-scrollbar {
+                width: 0px;
+                background: transparent;
+              }
+            </style>
+          </head>
+          <body>
+            <!-- Hover controls -->
+            <div class="controls">
+              <span id="title">Document</span>
+              <div class="buttons">
+                <button class="control-button fullscreen" onclick="toggleFullscreen()">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                  </svg>
+                  Fullscreen
+                </button>
+                <button class="control-button" onclick="refreshFrame()">Refresh</button>
+                <button class="control-button" onclick="window.close()">Close</button>
+              </div>
+            </div>
+            
+            <!-- Loading indicator -->
+            <div class="loading" id="loading">
+              <div class="spinner"></div>
+              <div class="message">Loading content...</div>
+            </div>
+            
+            <!-- The iframe container -->
+            <div id="frame-container"></div>
+            
+            <script>
+              // Hide the page from filtering systems
+              if (window.history && window.history.pushState) {
+                window.history.pushState('', 'Document', '/document');
+              }
+              
+              // Function to create and load the iframe
+              function loadContent() {
+                // For bypassing filters, we use a combination of techniques
+                const urlToEmbed = '${embedUrl}';
+                
+                // Create the iframe element
+                const iframe = document.createElement('iframe');
+                
+                // Set iframe attributes for maximum compatibility
+                iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
+                iframe.allowFullscreen = true;
+                iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals';
+                
+                // Add the iframe to the page
+                const container = document.getElementById('frame-container');
+                container.appendChild(iframe);
+                
+                // Set the source after a small delay to help avoid detection
+                setTimeout(() => {
+                  iframe.src = urlToEmbed;
+                  
+                  // Listen for load events
+                  iframe.onload = function() {
+                    document.getElementById('loading').style.display = 'none';
+                  };
+                  
+                  // Fallback if load event doesn't fire
+                  setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                  }, 8000);
+                }, 300);
+                
+                // Set up focus events to help maintain the disguise
+                window.addEventListener('focus', () => {
+                  document.title = 'Document';
+                });
+              }
+              
+              // Toggle fullscreen mode
+              function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen().catch(err => {
+                    console.error(\`Error attempting to enable fullscreen: \${err.message}\`);
+                  });
+                } else {
+                  if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                  }
+                }
+              }
+              
+              // Refresh the iframe content
+              function refreshFrame() {
+                const container = document.getElementById('frame-container');
+                container.innerHTML = '';
+                document.getElementById('loading').style.display = 'flex';
+                loadContent();
+              }
+              
+              // Initialize everything when the page loads
+              document.addEventListener('DOMContentLoaded', function() {
+                loadContent();
+                
+                // Set random titles periodically to help avoid detection
+                const titles = ['Document', 'Resources', 'Class Notes', 'Assignment', 'Project'];
+                setInterval(() => {
+                  if (!document.hasFocus()) {
+                    const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+                    document.title = randomTitle;
+                    document.getElementById('title').textContent = randomTitle;
+                  }
+                }, 5000);
+              });
+              
+              // Secondary loading detection
+              window.addEventListener('load', function() {
+                setTimeout(() => {
+                  document.getElementById('loading').style.display = 'none';
+                }, 5000);
+              });
+            </script>
+          </body>
+        </html>`;
+        
+        try {
+          // Write the HTML content to the new window
+          newWindow.document.open();
+          newWindow.document.write(html);
+          newWindow.document.close();
+          
+          // Focus the window to bring it to front
+          newWindow.focus();
+        } catch (e) {
+          console.error("Error writing to new window:", e);
+        }
+        
+        console.log("New window created with embedded content");
+        
+        // Add to history
+        addToHistory(embedUrl);
+        
+        // Show success message
+        showStatus('success', 'Website Unblocked', `Successfully unblocked ${new URL(embedUrl).hostname} in a new window. If nothing appeared, please check your popup blocker settings.`);
+        
+        return true;
+      } catch (error) {
+        console.error("Error embedding website:", error);
+        
+        let errorMessage = "An unknown error occurred";
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+        
+        showStatus('error', 'Unblocking Failed', `Failed to unblock the website: ${errorMessage}`);
+        return false;
+      }
+    }
+
+    // Handle game cards
+    function setupGameCards() {
+      document.querySelectorAll('[data-game]').forEach(card => {
+        card.addEventListener('click', () => {
+          const gameUrl = card.getAttribute('data-game');
+          if (gameUrl) {
+            handleEmbed(gameUrl);
+          }
+        });
+      });
+    }
+
+    // Handle video cards
+    function setupVideoCards() {
+      document.querySelectorAll('[data-video]').forEach(card => {
+        card.addEventListener('click', () => {
+          const videoUrl = card.getAttribute('data-video');
+          if (videoUrl) {
+            handleEmbed(videoUrl);
+          }
+        });
+      });
+    }
+
+    // Set up form submission
+    function setupForm() {
+      const form = document.getElementById('embed-form');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const urlInput = document.getElementById('url-input');
+        const url = urlInput.value.trim();
+        
+        if (url) {
+          console.log('Form submitted with URL:', url);
+          handleEmbed(url);
+        } else {
+          showStatus('error', 'Invalid URL', 'Please enter a website URL');
+        }
+      });
+    }
+
+    // Initialize the app
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTheme();
+      setupTabs();
+      loadEmbedHistory();
+      setupGameCards();
+      setupVideoCards();
+      setupForm();
+      
+      // Set up theme toggle
+      document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    });
+  </script>
+</body>
+</html>

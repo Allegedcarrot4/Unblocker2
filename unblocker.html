@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+    <title>Document</title>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background-color: #f8f9fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+      
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+      
+      .loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        z-index: 50;
+      }
+      
+      .spinner {
+        border: 5px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 5px solid #3498db;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .message {
+        font-size: 18px;
+        color: #444;
+        font-weight: 500;
+      }
+      
+      /* Hide the controls at first */
+      .controls {
+        position: fixed;
+        top: -40px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background-color: rgba(25, 25, 25, 0.8);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+        z-index: 100;
+        transition: top 0.3s ease;
+      }
+      
+      /* Show controls when user hovers at top of screen */
+      body:hover .controls {
+        top: 0;
+      }
+      
+      .control-button {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 5px 10px;
+        opacity: 0.85;
+        transition: opacity 0.2s;
+      }
+      
+      .control-button:hover {
+        opacity: 1;
+      }
+      
+      /* Fullscreen button style */
+      .fullscreen {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      /* For WebKit browsers */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hover controls -->
+    <div class="controls">
+      <span id="title">Document</span>
+      <div class="buttons">
+        <button class="control-button fullscreen" onclick="toggleFullscreen()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+          </svg>
+          Fullscreen
+        </button>
+        <button class="control-button" onclick="refreshFrame()">Refresh</button>
+        <button class="control-button" onclick="window.close()">Close</button>
+      </div>
+    </div>
+    
+    <!-- Loading indicator -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <div class="message">Loading content...</div>
+    </div>
+    
+    <!-- The iframe container -->
+    <div id="frame-container"></div>
+    
+    <script>
+      // Hide the page from filtering systems
+      if (window.history && window.history.pushState) {
+        window.history.pushState('', 'Document', '/document');
+      }
+      
+      // Function to create and load the iframe
+      function loadContent() {
+        // For bypassing filters, we use a combination of techniques
+        const urlToEmbed = 'https://www.gamepix.com/creapy-granny-scream';
+        
+        // Create the iframe element
+        const iframe = document.createElement('iframe');
+        
+        // Set iframe attributes for maximum compatibility
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
+        iframe.allowFullscreen = true;
+        iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals';
+        
+        // Add the iframe to the page
+        const container = document.getElementById('frame-container');
+        container.appendChild(iframe);
+        
+        // Set the source after a small delay to help avoid detection
+        setTimeout(() => {
+          iframe.src = urlToEmbed;
+          
+          // Listen for load events
+          iframe.onload = function() {
+            document.getElementById('loading').style.display = 'none';
+          };
+          
+          // Fallback if load event doesn't fire
+          setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+          }, 8000);
+        }, 300);
+        
+        // Set up focus events to help maintain the disguise
+        window.addEventListener('focus', () => {
+          document.title = 'Document';
+        });
+      }
+      
+      // Toggle fullscreen mode
+      function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+          });
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          }
+        }
+      }
+      
+      // Refresh the iframe content
+      function refreshFrame() {
+        const container = document.getElementById('frame-container');
+        container.innerHTML = '';
+        document.getElementById('loading').style.display = 'flex';
+        loadContent();
+      }
+      
+      // Initialize everything when the page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        loadContent();
+        
+        // Set random titles periodically to help avoid detection
+        const titles = ['Document', 'Resources', 'Class Notes', 'Assignment', 'Project'];
+        setInterval(() => {
+          if (!document.hasFocus()) {
+            const randomTitle = titles[Math.floor(Math.random() * titles.length)];
+            document.title = randomTitle;
+            document.getElementById('title').textContent = randomTitle;
+          }
+        }, 5000);
+      });
+      
+      // Secondary loading detection
+      window.addEventListener('load', function() {
+        setTimeout(() => {
+          document.getElementById('loading').style.display = 'none';
+        }, 5000);
+      });
+    </script>
+  </body>
+</html>

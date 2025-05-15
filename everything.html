@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My App</title>
+    <style>
+        .min-h-screen { min-height: 100vh; }
+        .bg-gradient-to-b { background: linear-gradient(to bottom, #EBF5FF, #F3F4F6); }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .bg-white { background-color: white; }
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+        .text-xl { font-size: 1.25rem; }
+        .font-bold { font-weight: 700; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .border { border: 1px solid #e5e7eb; }
+        .bg-card { background-color: white; }
+        .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); }
+        .h-10 { height: 2.5rem; }
+        .w-full { width: 100%; }
+        .rounded-md { border-radius: 0.375rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .text-sm { font-size: 0.875rem; }
+        .bg-background { background-color: #f9fafb; }
+        .font-sans { font-family: system-ui, sans-serif; }
+        .antialiased { -webkit-font-smoothing: antialiased; }
+    </style>
+</head>
+<body class="min-h-screen bg-background font-sans antialiased">
+    <div class="min-h-screen bg-gradient-to-b">
+        <header class="bg-white shadow-sm">
+            <nav class="container mx-auto px-4 py-3">
+                <h1 class="text-xl font-bold">My App</h1>
+            </nav>
+        </header>
+        <main class="container mx-auto px-4 py-8">
+            <h1>Protected Home</h1>
+            
+            <!-- Card Component -->
+            <div class="rounded-lg border bg-card shadow-sm">
+                <div class="p-4">
+                    Card Content Here
+                </div>
+            </div>
+
+            <!-- Input Component -->
+            <input type="text" class="h-10 w-full rounded-md border px-3 py-2 text-sm bg-background">
+        </main>
+    </div>
+
+    <!-- 404 Page Template -->
+    <template id="not-found">
+        <div>404 - Page Not Found</div>
+    </template>
+</body>
+</html>
